@@ -295,7 +295,7 @@ class HorizontalSmoothScrollController {
         const animatableElements = panel.querySelectorAll(`
             .title, .subtitle, .flower-emoji, .scroll-hint,
             h2, .album-subtitle, .pixel-flower, .sparkle, .album-hint,
-            .game-subtitle, .game-hint, .heart, .final-roses
+            .game-subtitle, .game-hint, .game-controls-display, .heart, .final-roses
         `);
         
         // Trigger animations with cute delays
@@ -324,6 +324,15 @@ class HorizontalSmoothScrollController {
                 setTimeout(() => {
                     this.createRoseShower(8);
                 }, 1000);
+                // Trigger crawl animation for final panel
+                const crawlContent = document.querySelector('.crawl-content-final');
+                if (crawlContent) {
+                    setTimeout(() => {
+                        crawlContent.style.animation = 'none';
+                        crawlContent.offsetHeight; // Trigger reflow
+                        crawlContent.style.animation = 'crawlFinal 25s linear forwards';
+                    }, 100);
+                }
             }
         }
     }
@@ -412,6 +421,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const horizontalScrollController = new HorizontalSmoothScrollController();
     const simpleRoseSystem = new SimpleRoseParticleSystem();
     
+    // Music toggle
+    const musicToggle = document.querySelector('.music-toggle');
+    const bgMusic = document.getElementById('bg-music');
+    
+    if (musicToggle && bgMusic) {
+        // Try to autoplay music (browsers may block this)
+        const tryAutoplay = () => {
+            bgMusic.play().then(() => {
+                musicToggle.classList.add('playing');
+            }).catch(() => {});
+        };
+        
+        // Try autoplay after a short delay
+        setTimeout(tryAutoplay, 500);
+        
+        musicToggle.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    musicToggle.classList.add('playing');
+                }).catch(e => console.log('Audio play failed:', e));
+            } else {
+                bgMusic.pause();
+                musicToggle.classList.remove('playing');
+            }
+        });
+    }
+    
     // Star Wars intro handling
     const starWarsIntro = document.querySelector('.star-wars-intro');
     if (starWarsIntro) {
@@ -420,6 +456,13 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 starWarsIntro.style.display = 'none';
             }, 1000);
+            
+            // Try to play music on user interaction
+            if (bgMusic && bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    if (musicToggle) musicToggle.classList.add('playing');
+                }).catch(() => {});
+            }
             
             // Trigger hero panel animations after intro
             setTimeout(() => {
@@ -848,6 +891,8 @@ function activateNerdyMode() {
 }
 
 // Heart Catching Game
+let gameInterval = null;
+
 function initHeartGame() {
     const gameContainer = document.querySelector('.game-container');
     const basket = document.querySelector('.basket');
@@ -916,13 +961,38 @@ function initHeartGame() {
                 score += 1;
                 scoreDisplay.textContent = score;
                 
-                // Visual feedback
-                basket.style.transform = 'translateX(-50%) scale(1.2)';
+                // Score bump animation
+                scoreDisplay.classList.add('bump');
+                setTimeout(() => scoreDisplay.classList.remove('bump'), 200);
+                
+                // Visual feedback with effects
+                basket.style.transform = 'translateX(-50%) scale(1.3)';
+                basket.style.filter = 'drop-shadow(0 0 15px var(--pixel-mint))';
+                createCatchEffect(basketRect.left + basketRect.width/2, basketRect.top);
                 setTimeout(() => {
                     basket.style.transform = 'translateX(-50%) scale(1)';
-                }, 100);
+                    basket.style.filter = 'drop-shadow(2px 2px 0 var(--pixel-bg-dark))';
+                }, 150);
             }
         });
+    }
+    
+    function createCatchEffect(x, y) {
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.innerHTML = ['✨', '💫', '⭐', '🌟'][Math.floor(Math.random() * 4)];
+            particle.style.cssText = `
+                position: fixed;
+                font-size: 1rem;
+                left: ${x + (Math.random() - 0.5) * 40}px;
+                top: ${y + (Math.random() - 0.5) * 20}px;
+                pointer-events: none;
+                z-index: 100;
+                animation: catchParticle 0.6s ease-out forwards;
+            `;
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 600);
+        }
     }
     
     function gameLoop() {
@@ -936,7 +1006,7 @@ function initHeartGame() {
          
         score = 0;
         scoreDisplay.textContent = '0';
-        vegetables.forEach(v => v.element.remove());
+        vegetables.forEach(v => v.element && v.element.remove());
         vegetables = [];
         
         const existingMessage = gameContainer.querySelector('.game-message');
@@ -949,11 +1019,17 @@ function initHeartGame() {
         vegetableSpawnInterval = setInterval(spawnVegetable, 800);
         gameLoop();
         
+        // Add game-active class for effects
+        gameContainer.classList.add('game-active');
+        
         setTimeout(() => {
             if (gameRunning) {
                 clearInterval(vegetableSpawnInterval);
                 gameRunning = false;
-                cancelAnimationFrame(gameInterval);
+                if (gameInterval) {
+                    cancelAnimationFrame(gameInterval);
+                    gameInterval = null;
+                }
                 
                 const message = document.createElement('div');
                 message.className = 'game-message';
@@ -962,6 +1038,7 @@ function initHeartGame() {
                 
                 startBtn.textContent = 'PLAY AGAIN';
                 startBtn.disabled = false;
+                gameContainer.classList.remove('game-active');
             }
         }, 30000);
     }

@@ -11,6 +11,10 @@
         />
     </head>
     <body>
+        <button class="music-toggle" aria-label="Toggle Music">🎵</button>
+        <audio id="bg-music" loop>
+            <source src="music.mp3" type="audio/mpeg">
+        </audio>
         <div class="star-wars-intro">
             <div class="crawl-container">
                 <div class="crawl-content">
@@ -124,23 +128,53 @@
                     <div class="game-controls">
                         <button class="start-btn">START GAME</button>
                     </div>
+                    <div class="game-controls-display">
+                        <div class="control-item">
+                            <span class="control-key wide">Mouse</span>
+                            <span>Move</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="control-key">←</span>
+                            <span class="control-key">→</span>
+                            <span>or A/D</span>
+                        </div>
+                        <div class="control-item">
+                            <span class="control-key wide">Touch</span>
+                            <span>Slide</span>
+                        </div>
+                    </div>
                     <p class="game-hint">catch the lady's fingers 👆</p>
                 </div>
             </section>
 
             <section class="panel message-panel">
-                <div class="panel-content">
-                    <h2>one more thing...</h2>
-                    <p>
-                        hey, so... if any of this was too much or I overstepped 
-                        any boundaries, I'm really sorry
-                    </p>
-                    <p>that wasn't my intention at all</p>
-                    <p class="apology-text">
-                        I just hope you can forgive me if I went too far 💭
-                    </p>
-                    <div class="heart">❤️</div>
-                    <div class="final-roses">🌹🌹🌹</div>
+                <div class="crawl-container-final">
+                    <div class="crawl-content-final">
+                        <div class="crawl-title-final">THE END</div>
+                        <p class="crawl-subtitle-final">Thank you for scrolling this far</p>
+                        <p>
+                            If you made it here, you must really care.
+                        </p>
+                        <p>
+                            Or you just have way too much free time.
+                        </p>
+                        <p>
+                            Either way, I'm glad you stayed.
+                        </p>
+                        <p>
+                            This whole thing was a bit crazy,
+                        </p>
+                        <p>
+                            maybe too much, maybe just enough.
+                        </p>
+                        <p>
+                            But hey, at least there's a flower game.
+                        </p>
+                        <p>
+                            Thanks for bearing with me 💜
+                        </p>
+                        <p class="crawl-hearts-final">🌹 🌹 🌹</p>
+                    </div>
                 </div>
             </section>
         </div>
